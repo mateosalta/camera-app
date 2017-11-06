@@ -435,9 +435,10 @@ Item {
                     property bool isToggle: true
                     property int selectedIndex: bottomEdge.indexForValue(screenFlashOptionsModel, settings.screenFlashEnabled)
                     //TODO: try and make abaible only on selfie cam, this will set to only cameras without flash, but need a way to deselect after camera switch
-                    //property bool available: !camera.advanced.hasFlash
-                    property bool available: true
-
+                    property bool available: !camera.advanced.hasFlash
+                   // property bool available: true
+                    //changes when avaible changes
+                    onAvailableChanged: settings.screenFlashEnabled = false
                     property bool visible: camera.captureMode == Camera.CaptureStillImage
 
                     ListElement {
