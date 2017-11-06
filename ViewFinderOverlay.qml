@@ -50,6 +50,7 @@ Item {
         property int selfTimerDelay: 0
         property int encodingQuality: 2 // QMultimedia.NormalQuality
         property bool gridEnabled: false
+        property bool screenFlashEnabled: true
         property bool preferRemovableStorage: false
         property string videoResolution: "1920x1080"
         property bool playShutterSound: true
@@ -57,8 +58,13 @@ Item {
         property bool dateStampImages: false
 
         Component.onCompleted: if (!photoResolutions) photoResolutions = {}
-        onFlashModeChanged: if (flashMode != Camera.FlashOff) hdrEnabled = false;
+        onFlashModeChanged: if (flashMode != Camera.FlashOff) {hdrEnabled = false
+                               /* screenFlashEnabled = true }
+           else{screenFlashEnabled = false} */
         onHdrEnabledChanged: if (hdrEnabled) flashMode = Camera.FlashOff
+        // if (camera.advanced.hasFlash) screenFlashEnabled = false;
+
+    }
     }
 
     Binding {
@@ -73,6 +79,13 @@ Item {
         property: "mode"
         value: viewFinderView.inView ?  settings.videoFlashMode : Camera.FlashOff
         when: camera.captureMode == Camera.CaptureVideo
+    }
+
+    Binding {
+        target: camera.advanced
+        property: "screenFlashEnabled"
+        value: settings.screenFlashEnabled
+        when: camera.captureMode == Camera.CaptureStillImage
     }
 
     Binding {
@@ -413,6 +426,32 @@ Item {
                     }
                 },
                 ListModel {
+                    id: screenFlashOptionsModel
+
+                    property string settingsProperty: "screenFlashEnabled"
+                    property string icon: ""
+                    property string iconSource: "assets/screenflash.png"
+                    property string label: ""
+                    property bool isToggle: true
+                    property int selectedIndex: bottomEdge.indexForValue(screenFlashOptionsModel, settings.screenFlashEnabled)
+                    //TODO: try and make abaible only on selfie cam, this will set to only cameras without flash, but need a way to deselect after camera switch
+                    //property bool available: !camera.advanced.hasFlash
+                    property bool available: true
+
+                    property bool visible: camera.captureMode == Camera.CaptureStillImage
+
+                    ListElement {
+                        icon: ""
+                        label: QT_TR_NOOP("On")
+                        value: true
+                    }
+                    ListElement {
+                        icon: ""
+                        label: QT_TR_NOOP("Off")
+                        value: false
+                    }
+                },
+                ListModel {
                     id: hdrOptionsModel
 
                     property string settingsProperty: "hdrEnabled"
@@ -515,6 +554,7 @@ Item {
                         value: false
                     }
                 },
+
                 ListModel {
                     id: removableStorageOptionsModel
 
@@ -913,7 +953,11 @@ Item {
             enabled: !camera.switchInProgress && camera.videoRecorder.recorderState == CameraRecorder.StoppedState
                      && !camera.photoCaptureInProgress && !camera.timedCaptureInProgress
             iconName: "camera-flip"
-            onClicked: controls.switchCamera()
+            onClicked: { controls.switchCamera()
+
+
+
+            }
         }
 
 

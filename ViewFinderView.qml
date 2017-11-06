@@ -387,7 +387,11 @@ FocusScope {
         Rectangle {
             id: shootFeedback
             anchors.fill: parent
-            color: "black"
+
+            color: if (!viewFinderOverlay.settings.screenFlashEnabled){"black"}
+                   else if(viewFinderOverlay.settings.screenFlashEnabled){"white"}
+
+
             visible: opacity != 0.0
             opacity: 0.0
 
