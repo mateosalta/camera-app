@@ -44,6 +44,7 @@ Item {
         id: settings
 
         property int flashMode: Camera.FlashAuto
+        property bool screenFlash: false
         property bool gpsEnabled: false
         property bool hdrEnabled: false
         property int videoFlashMode: Camera.FlashOff
@@ -390,6 +391,29 @@ Item {
                     }
                 },
                 ListModel {
+                    id: screenFlashOptionsModel
+
+                    property string settingsProperty: "screenFlash"
+                    property string icon: ""
+                    property string label: ""
+                    property bool isToggle: true
+                    property int selectedIndex: bottomEdge.indexForValue(screenFlashOptionsModel, settings.screenFlash)
+                    property bool available: (!camera.advanced.hasFlash && camera.position === Camera.FrontFace)
+                    property bool visible: camera.captureMode == Camera.CaptureStillImage
+                    property bool showInIndicators: true
+
+                    ListElement {
+                        iconSource: "assets/screen_flash_on.png"
+                        label: QT_TR_NOOP("On")
+                        value: true
+                    }
+                    ListElement {
+                        iconSource: "assets/screen_flash_off.png"
+                        label: QT_TR_NOOP("Off")
+                        value: false
+                    }
+                },
+                ListModel {
                     id: videoFlashOptionsModel
 
                     property string settingsProperty: "videoFlashMode"
@@ -691,6 +715,24 @@ Item {
                 timedShootFeedback.stop();
             }
         }
+        function prepareShoot() {
+            shootFeedback.start();
+            if (camera.captureMode == Camera.CaptureStillImage && shootFeedback.shouldFlash) {
+                // TODO this should be using 'camera.exposure.shutterSpeed' but currently it just returns -1.
+                // console.log(camera.exposure.shutterSpeed * 1000);
+                shootTimer.interval = 150;
+            } else {
+               shootTimer.interval = 0;
+            }
+        }
+
+        Timer {
+            id:shootTimer
+            interval: 0
+            repeat: false
+            running: false
+            onTriggered: controls.shoot();
+        }
 
         function shoot() {
             var orientation = 0;
@@ -740,9 +782,7 @@ Item {
                     camera.videoRecorder.record();
                 }
             } else {
-                if (!main.contentExportMode) {
-                    shootFeedback.start();
-                }
+
                 camera.photoCaptureInProgress = true;
                 camera.imageCapture.setMetadata("Orientation", orientation);
                 camera.imageCapture.setMetadata("Date", new Date());
@@ -885,7 +925,8 @@ Item {
                     if (settings.selfTimerDelay > 0) {
                         controls.timedShoot(settings.selfTimerDelay);
                     } else {
-                        controls.shoot();
+                        controls.prepareShoot();
+                        shootTimer.start();
                     }
                 }
             }

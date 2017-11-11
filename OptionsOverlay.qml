@@ -143,6 +143,7 @@ Item {
 
             label: (model && model.label) ? i18n.tr(model.label) : ""
             iconName: (model && model.icon) ? model.icon : ""
+            iconSource: (model && model.iconSource) ? model.iconSource : ""
             selected: optionValueSelector.model.selectedIndex == index
 
             isLast: index === optionValueSelector.count - 1
