@@ -24,6 +24,7 @@ AbstractButton {
 
     property alias label: label.text
     property alias iconName: icon.name
+    property alias iconSource: icon.source
     property bool selected
     property bool isLast
     property int columnWidth

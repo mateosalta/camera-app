@@ -387,13 +387,18 @@ FocusScope {
         Rectangle {
             id: shootFeedback
             anchors.fill: parent
-            color: "white"
+            property bool shouldFlash : ( !camera.advanced.hasFlash
+                                        && camera.position === Camera.FrontFace
+                                        && viewFinderOverlay.settings.screenFlash )
+            color: shouldFlash ? "white" : "black"
             visible: opacity != 0.0
             opacity: 0.0
 
             function start() {
-                shootFeedback.opacity = 1.0;
-                shootFeedbackAnimation.restart();
+                if (!main.contentExportMode) {
+                   shootFeedback.opacity = 1.0;
+                   shootFeedbackAnimation.restart();
+                }
             }
 
             OpacityAnimator {
@@ -401,9 +406,10 @@ FocusScope {
                 target: shootFeedback
                 from: 1.0
                 to: 0.0
-                duration: UbuntuAnimation.SnapDuration
+                duration: UbuntuAnimation.BriskDuration
                 easing: UbuntuAnimation.StandardEasing
             }
+
         }
     }
 
